@@ -43,3 +43,7 @@ Xem README để cài dependency kiểm thử trên máy khác. PGlite 0.3.14 đ
 - Chưa kiểm tra tải đồng thời lớn, spam RPC, proxy CAPTCHA hoặc giới hạn tần suất. CAPTCHA/rate limit phía máy chủ là phần cần bổ sung trước khi mở thu thập công khai diện rộng.
 - Kiểm thử sắp xếp và một số bộ lọc xác nhận thao tác và cập nhật UI, không duyệt mọi hoán vị bộ lọc/ngày/thứ tự. Không khẳng định bộ đề được chuẩn hóa tâm lý học.
 - Bản nháp môi trường lưu `start_skill`; chưa có bằng chứng xuất bản snapshot hoặc khôi phục trong task mới.
+
+## Cập nhật đăng nhập giáo viên — 20/10/2026
+
+Đã thêm trang teacher-login.html cho chế độ cục bộ, dùng phiên theo tab. Kiểm thử `node tests/teacher-login.cjs` xác nhận: truy cập admin trực tiếp chuyển tới đăng nhập; mật khẩu sai bị từ chối; tài khoản được yêu cầu đăng nhập thành công; bật/tắt hiển thị mật khẩu; tải lại giữ phiên; đăng xuất xóa phiên; giao diện 375 px không tràn; không có lỗi JavaScript. Bộ 22 kiểm thử trình duyệt được cập nhật để đăng nhập trước khi kiểm tra dashboard cục bộ. Đây chỉ là lớp giao diện, không phải cơ chế bảo mật cho localStorage; chế độ Supabase tiếp tục dùng Auth và RLS.

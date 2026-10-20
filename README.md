@@ -37,7 +37,7 @@ Bản JSON sao lưu có định danh và câu trả lời; bảo quản an toàn
 
 ## Dữ liệu cục bộ
 
-Tiến độ, đáp án và kết quả lưu trong localStorage của đúng origin/trình duyệt. Không đồng bộ giữa thiết bị, tên miền hay hồ sơ trình duyệt; xóa dữ liệu trình duyệt sẽ mất dữ liệu. Trang admin cục bộ **không có đăng nhập**: bất cứ ai mở trên cùng thiết bị đều xem được. Không nên dùng thiết bị chung để lưu thông tin nhạy cảm.
+Tiến độ, đáp án và kết quả lưu trong localStorage của đúng origin/trình duyệt. Không đồng bộ giữa thiết bị, tên miền hay hồ sơ trình duyệt; xóa dữ liệu trình duyệt sẽ mất dữ liệu. Trang quản trị cục bộ có trang `teacher-login.html` theo yêu cầu: tài khoản `admin`, mật khẩu `admin@dvt`. Phiên đăng nhập lưu trong sessionStorage của tab; đăng xuất xóa phiên. Đây chỉ là lớp giao diện để tránh mở dashboard ngoài ý muốn, **không bảo vệ dữ liệu**: mã xác minh nằm trong JavaScript và có thể bị bỏ qua; bất cứ ai có quyền dùng trình duyệt trên thiết bị vẫn có thể đọc dữ liệu cục bộ. Khi cấu hình Supabase, vẫn phải dùng Supabase Auth và RLS, tài khoản cục bộ không cấp quyền cơ sở dữ liệu. Không nên dùng thiết bị chung để lưu thông tin nhạy cảm.
 
 Ứng dụng phát hiện lỗi lưu trữ và thông báo, có thể tiếp tục trong bộ nhớ phiên. Khi lưu thất bại hãy in/PDF/sao chép ngay. Nhập JSON kiểm tra toàn bộ tệp trước khi ghi, tính lại điểm, hồ sơ và gợi ý từ câu trả lời, gộp theo UUID để không nhân đôi. Điểm/mã trong tệp không được tin cậy.
 

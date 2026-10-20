@@ -11,3 +11,7 @@
   for = "/admin.html"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
+[[headers]]
+  for = "/teacher-login.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
