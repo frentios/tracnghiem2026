@@ -117,7 +117,7 @@ Bài kiểm thử SQL dùng PostgreSQL nhúng PGlite với role anon/authenticat
 5. Làm một bài, kiểm tra phần “Khám phá nghề từ nguồn tuyển dụng”: nguồn, thời điểm, số chức danh thực có và 5 gợi ý cá nhân. API `/api/recommend` nhận POST chỉ gồm `{ "answers": [40 giá trị 0 hoặc 1] }`, tự tính lại điểm và giữ `?` khi hòa; từ chối payload có định danh.
 6. Nếu đang dùng Supabase, chạy lại `supabase/schema.sql` để thêm cột `market_snapshot` trước khi dùng dashboard mới. Snapshot nghề được lưu cùng kết quả với provenance `client_reference`: tham chiếu từ client, không phải dữ liệu nguồn được Supabase chứng thực. Điểm/mã vẫn được tính lại bằng SQL.
 
-`config.js` hiện dùng `market: { mode: "server", provider: "jooble", apiUrl: "api/careers", recommendUrl: "api/recommend" }`. Hai URL tương đối chạy cùng origin trên Netlify. Chưa hỗ trợ mặc định gọi chéo origin từ GitHub Pages sang backend khác; cấu hình CORS/allowlist CSP phải được thiết kế riêng nếu muốn tách hosting.
+`config.js` hiện dùng `market: { mode: "auto", provider: "jooble", apiUrl: "api/careers", recommendUrl: "api/recommend" }`. Hai URL tương đối chạy cùng origin trên Netlify. Chưa hỗ trợ mặc định gọi chéo origin từ GitHub Pages sang backend khác; cấu hình CORS/allowlist CSP phải được thiết kế riêng nếu muốn tách hosting.
 
 ### Dữ liệu “50 nghề phổ biến” nghĩa là gì?
 
@@ -144,3 +144,8 @@ node tests/market.cjs
 ```
 
 Kiểm thử này dùng fixture đánh dấu rõ trong test và mock fetch, không lấy dữ liệu giả để hiển thị cho người dùng thật. Kiểm tra thật với Jooble vẫn chưa thực hiện do chưa có API key, truy cập tài liệu/API từ môi trường hiện tại bị chặn 403. Không coi việc test mock vượt qua là bằng chứng nguồn đã kết nối.
+
+
+### Chạy trên GitHub Pages (bản sửa lỗi 405)
+
+Chế độ auto nhận diện hostname `*.github.io`: không POST đáp án tới API tương đối trên Pages, không hiện nút tải lại khi backend chưa tồn tại. Gợi ý nhóm ngành cục bộ tiếp tục hoạt động. Với custom domain, HTTP 404/405 hoặc response HTML thay JSON được xem là backend chưa bật, không phải lỗi mạng cần thử liên tục. Netlify thiếu key trả mã máy đọc BACKEND_NOT_CONFIGURED. Đây là xử lý trạng thái chưa cấu hình, không tự tạo backend hay nguồn dữ liệu trực tuyến. Để có đề xuất nghề mới vẫn cần Netlify Functions và JOOBLE_API_KEY.

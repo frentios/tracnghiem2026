@@ -23,5 +23,5 @@ exports.handler=async(event)=>{
   // Coalesce warm-instance requests; CDN cache limits upstream usage and quota.
   if(!cached||Date.now()-Date.parse(cached.fetchedAt)>600000){if(!pending)pending=collect().then(value=>(cached=value)).finally(()=>pending=null);await pending;}
   return {statusCode:200,headers:{...headers,'Cache-Control':'public, max-age=60, s-maxage=600','Netlify-CDN-Cache-Control':'public, s-maxage=600, stale-while-revalidate=60'},body:JSON.stringify(cached)};
- }catch(error){return {statusCode:error.statusCode||502,headers:{...headers,'Cache-Control':'no-store'},body:JSON.stringify({error:error.statusCode?error.message:'Không tải được dữ liệu Jooble Việt Nam. Hãy thử lại.'})}}
+ }catch(error){return {statusCode:error.statusCode||502,headers:{...headers,'Cache-Control':'no-store'},body:JSON.stringify({error:error.statusCode?error.message:'Không tải được dữ liệu Jooble Việt Nam. Hãy thử lại.',...(error.statusCode===503?{code:'BACKEND_NOT_CONFIGURED'}:{})})}}
 };

@@ -67,3 +67,8 @@ Xem README để cài dependency kiểm thử trên máy khác. PGlite 0.3.14 đ
 **Chưa xác minh live**: chưa có JOOBLE_API_KEY hoặc quyền triển khai Netlify trong môi trường. Truy cập tài liệu chính thức Jooble/Arbeitnow/ESCO bị chặn 403; tài liệu Remotive từ GitHub đọc được và xác nhận nguồn đó không phù hợp làm mặc định Việt Nam (thiên remote, khuyến nghị tối đa 4 lượt/ngày). Adapter Jooble đang dựa trên contract API `POST /api/{key}`, các trường jobs/title/link/company/location/updated; cần xác minh lại với key thật và điều khoản/hạn mức tài khoản trước khi gọi kết nối là đã hoạt động. Không có dữ liệu tuyển dụng giả hoặc snapshot mẫu được nhúng vào website phát hành.
 
 GitHub Pages không thực thi Functions. Đẩy mã lên GitHub chỉ cập nhật frontend và mã backend; cần Netlify Git deployment + biến JOOBLE_API_KEY để phần động chạy thật. Các trường hợp CORS tách hosting, hạn mức live, phạm vi Việt Nam thực tế của nhà cung cấp, tốc độ triển khai và quota lớn chưa được kiểm thử.
+
+
+## Sửa lỗi 405 trên GitHub Pages — 20/10/2026
+
+Kiểm thử `node tests/static-host.cjs`: giả lập origin GitHub Pages và xác nhận không gọi API/POST, không hiện lỗi 405 hoặc nút thử lại vô ích; liên kết tới gợi ý cục bộ hoạt động và vẫn đủ 5 nhóm gợi ý. Trên origin khác, kiểm tra 405, response HTML 200 và 503 BACKEND_NOT_CONFIGURED đều hiển thị trạng thái chưa kích hoạt. Không coi đây là bằng chứng backend live đã chạy. Chạy lại `node tests/market.cjs` để xác minh luồng API bình thường, lỗi mạng và cache.
