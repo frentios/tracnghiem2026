@@ -5,6 +5,7 @@ create table if not exists public.submissions (
  id uuid primary key, created_at timestamptz not null default now(),
  student_id text not null check(length(student_id)<=120), name text not null check(length(name)<=120),
  class_name text not null check(length(class_name)<=120), code text not null check(code ~ '^[EI?][SN?][TF?][JP?]$'), points jsonb not null);
+alter table public.submissions add column if not exists market_snapshot jsonb;
 create table if not exists public.answers (
  submission_id uuid references public.submissions(id) on delete cascade,
  question_id integer check(question_id between 1 and 40), choice integer not null check(choice in (0,1)), primary key(submission_id,question_id));
@@ -39,7 +40,7 @@ declare
  pts jsonb := '{"E":0,"I":0,"S":0,"N":0,"T":0,"F":0,"J":0,"P":0}';
  letters text[] := array['EI','SN','TF','JP'];
  rec record; ident uuid; i integer; ch integer; trait text; code_value text := ''; pair text; ids text[]; inserted integer;
- student jsonb;
+ student jsonb; market_value jsonb;
 begin
  if jsonb_typeof(p) is distinct from 'object' or jsonb_typeof(p->'answers') is distinct from 'array' then raise exception 'Invalid payload'; end if;
  if jsonb_array_length(p->'answers') <> 40 then raise exception 'Exactly 40 answers required'; end if;
@@ -70,8 +71,21 @@ begin
  select array_agg(career order by n desc, career::integer) into ids from (
  select x.career,count(*) n from jsonb_each(mapping) m cross join lateral jsonb_array_elements_text(m.value) x(career)
  where m.key like replace(code_value,'?','_') group by x.career order by n desc,x.career::integer limit 5) ranked;
- insert into public.submissions(id,student_id,name,class_name,code,points)
- values(ident,student->>'studentId',student->>'name',student->>'className',code_value,pts) on conflict(id) do nothing;
+ -- Market snapshots are client references, never trusted for personality points.
+ market_value := nullif(p->'market','null'::jsonb);
+ if market_value is not null then
+  if jsonb_typeof(market_value) is distinct from 'object' or octet_length(market_value::text)>262144 then raise exception 'Invalid market snapshot'; end if;
+  if (market_value->>'provider') is null or (market_value->>'provider') not in ('jooble','arbeitnow') then raise exception 'Unknown market provider'; end if;
+  if jsonb_typeof(market_value->'recommendations') is distinct from 'array' then raise exception 'Invalid market recommendations'; end if;
+  if jsonb_array_length(market_value->'recommendations') not between 1 and 5 then raise exception 'Invalid market recommendation count'; end if;
+  for rec in select value from jsonb_array_elements(market_value->'recommendations') loop
+   if jsonb_typeof(rec.value->'title') is distinct from 'string' or length(rec.value->>'title')>200 then raise exception 'Invalid market title'; end if;
+   if (rec.value->>'groupId') is null or (rec.value->>'groupId') !~ '^(?:[1-9]|1[0-6])$' then raise exception 'Invalid market group'; end if;
+  end loop;
+  market_value := market_value || '{"provenance":"client_reference"}'::jsonb;
+ end if;
+ insert into public.submissions(id,student_id,name,class_name,code,points,market_snapshot)
+ values(ident,student->>'studentId',student->>'name',student->>'className',code_value,pts,market_value) on conflict(id) do nothing;
  get diagnostics inserted = row_count;
  if inserted=0 then return ident; end if;
  for i in 0..39 loop

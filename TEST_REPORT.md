@@ -47,3 +47,23 @@ Xem README để cài dependency kiểm thử trên máy khác. PGlite 0.3.14 đ
 ## Cập nhật đăng nhập giáo viên — 20/10/2026
 
 Đã thêm trang teacher-login.html cho chế độ cục bộ, dùng phiên theo tab. Kiểm thử `node tests/teacher-login.cjs` xác nhận: truy cập admin trực tiếp chuyển tới đăng nhập; mật khẩu sai bị từ chối; tài khoản được yêu cầu đăng nhập thành công; bật/tắt hiển thị mật khẩu; tải lại giữ phiên; đăng xuất xóa phiên; giao diện 375 px không tràn; không có lỗi JavaScript. Bộ 22 kiểm thử trình duyệt được cập nhật để đăng nhập trước khi kiểm tra dashboard cục bộ. Đây chỉ là lớp giao diện, không phải cơ chế bảo mật cho localStorage; chế độ Supabase tiếp tục dùng Auth và RLS.
+
+## Cập nhật API nghề Việt Nam — 20/10/2026
+
+Đã thêm backend Node.js qua Netlify Functions, adapter Jooble, engine xếp hạng chung browser/server và snapshot lưu cùng bài. `tests/market.cjs` có 9 nhóm kiểm tra vượt qua bằng fixture/mock:
+
+1. Phân loại tên tiếng Việt, loại tin trùng URL, gộp chức danh, chọn 50 từ 60 chức danh hợp lệ, loại URL không an toàn.
+2. Xếp hạng theo cả 4 cặp, hòa giữ trung lập; không dùng định danh để tính gợi ý.
+3. Nguồn có ít hơn 50 chức danh giữ đúng số thật.
+4. API `/api/recommend` tự tính 40 đáp án, trả mã hòa đúng, từ chối thiếu câu và payload có định danh.
+5. Backend phân trang với `location: Việt Nam`, bộ đệm, phương thức HTTP và không đưa khóa vào response.
+6. Thiếu key trả 503; key/quyền sai trả lỗi 502 không lộ khóa.
+7. UI hiển thị 5 gợi ý từ catalog 50, lưu snapshot, mở lại giữ bản cũ và không tràn ngang 375 px.
+8. Khi mất kết nối và có cache, gắn nhãn bản cũ thay vì gọi là dữ liệu mới.
+9. Khi lỗi và chưa có cache, không bịa nghề và vẫn có nút thử lại.
+
+Đã chạy lại thành công 22 nhóm Playwright cũ, kiểm thử đăng nhập giáo viên và 7 nhóm SQL. SQL còn kiểm tra lưu market_snapshot với provenance `client_reference` và từ chối provider/nhóm ngành không hợp lệ. Frontend vẫn có thể chạy trắc nghiệm/gợi ý nhóm cục bộ khi backend chưa có.
+
+**Chưa xác minh live**: chưa có JOOBLE_API_KEY hoặc quyền triển khai Netlify trong môi trường. Truy cập tài liệu chính thức Jooble/Arbeitnow/ESCO bị chặn 403; tài liệu Remotive từ GitHub đọc được và xác nhận nguồn đó không phù hợp làm mặc định Việt Nam (thiên remote, khuyến nghị tối đa 4 lượt/ngày). Adapter Jooble đang dựa trên contract API `POST /api/{key}`, các trường jobs/title/link/company/location/updated; cần xác minh lại với key thật và điều khoản/hạn mức tài khoản trước khi gọi kết nối là đã hoạt động. Không có dữ liệu tuyển dụng giả hoặc snapshot mẫu được nhúng vào website phát hành.
+
+GitHub Pages không thực thi Functions. Đẩy mã lên GitHub chỉ cập nhật frontend và mã backend; cần Netlify Git deployment + biến JOOBLE_API_KEY để phần động chạy thật. Các trường hợp CORS tách hosting, hạn mức live, phạm vi Việt Nam thực tế của nhà cung cấp, tốc độ triển khai và quota lớn chưa được kiểm thử.
