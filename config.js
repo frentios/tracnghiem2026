@@ -1,1 +1,1 @@
-window.CONFIG = Object.freeze({schoolName:'Không gian hướng nghiệp THPT',supabaseUrl:'',supabaseAnonKey:'',required:{studentId:false,name:false,className:false},anonymousExport:true,market:{mode:"auto",provider:"jooble",apiUrl:"api/careers",recommendUrl:"api/recommend"}});
+window.CONFIG = Object.freeze({schoolName:'Không gian hướng nghiệp THPT',supabaseUrl:'',supabaseAnonKey:'',required:{studentId:false,name:false,className:false},anonymousExport:true,market:{dataUrl:"data/market.json"}});

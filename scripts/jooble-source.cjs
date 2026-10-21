@@ -1,8 +1,7 @@
-const Engine=require('../../career-engine.js');
-let cached=null,pending=null;
+const Engine=require('../career-engine.js');
 async function collect(){
  const key=process.env.JOOBLE_API_KEY;
- if(!key){const error=Error('Chưa cấu hình JOOBLE_API_KEY trên backend. Hãy dùng Netlify Functions; GitHub Pages không chạy API riêng.');error.statusCode=503;throw error;}
+ if(!key){const error=Error('Chưa cấu hình JOOBLE_API_KEY trong GitHub Actions Secrets.');error.statusCode=503;throw error;}
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
  try{const jobs=[];let pages=0,totalAvailable=null;const seenPages=new Set();
  for(let i=1;i<=5;i++){
@@ -16,12 +15,4 @@ async function collect(){
  return Engine.aggregate(jobs,{pages,provider:'jooble',totalAvailable});
  }finally{clearTimeout(timer)}
 }
-exports.handler=async(event)=>{
- const headers={'Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff'};
- if(event.httpMethod!=='GET')return {statusCode:405,headers:{...headers,Allow:'GET'},body:JSON.stringify({error:'Method not allowed'})};
- try{
-  // Coalesce warm-instance requests; CDN cache limits upstream usage and quota.
-  if(!cached||Date.now()-Date.parse(cached.fetchedAt)>600000){if(!pending)pending=collect().then(value=>(cached=value)).finally(()=>pending=null);await pending;}
-  return {statusCode:200,headers:{...headers,'Cache-Control':'public, max-age=60, s-maxage=600','Netlify-CDN-Cache-Control':'public, s-maxage=600, stale-while-revalidate=60'},body:JSON.stringify(cached)};
- }catch(error){return {statusCode:error.statusCode||502,headers:{...headers,'Cache-Control':'no-store'},body:JSON.stringify({error:error.statusCode?error.message:'Không tải được dữ liệu Jooble Việt Nam. Hãy thử lại.',...(error.statusCode===503?{code:'BACKEND_NOT_CONFIGURED'}:{})})}}
-};
+module.exports={collect};
